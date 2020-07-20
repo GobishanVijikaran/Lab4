@@ -46,11 +46,32 @@ void client(void *arg){
 			
 			currentQueue = 1;
 		}
-}
+	}
+} 
 
 void server(void *arg){
 	// start by determing which queue it's watching then wait for a random period of time before 
 	// retrieving a message from its queue. Repeats indefinitely
+	
+	int currentQueue = (int)arg; 
+	int message = 23; // message to put in queue 
+	
+	while(true){
+		osDelay((next_event()*osKernelGetTickFreq()/10) >> 16); 
+		
+		if(currentQueue == 1){
+			if((osMessageQueueGet(queue1, &message, NULL, osWaitForever) == osOK)){
+				q1Received++; 
+			}
+		}
+		
+		else{
+			if ((osMessageQueueGet(queue1, &message, NULL, osWaitForever) == osOK)){
+				q2Received++; 
+			}
+		}
+		osThreadYield(); 
+	}
 }
 
 void monitor(void *arg){
@@ -71,6 +92,7 @@ void monitor(void *arg){
 		printf("The following number of messages were overflow... \n Queue 1 --> %d \n Queue 2 --> %d \n",
 						q1Overflow,
 						q2Overflow);
+	}
 }
 
 int main(){
