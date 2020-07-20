@@ -20,19 +20,22 @@ void client(void *arg){
 	int currentQueue = 1;
 	int messageQueuePut;
 	
+	// infinite polling
 	while(true){
+		// waits random period of time (next_event() from random.c). 9hz is the average arrival rate at each (so 18 for 2 queues)
 		osDelay((next_event()* osKernelGetTickFreq() / (9*2)) >> 16);
 		int message = 57;
 		
 		if(currentQueue == 1){
+			// sending int message to the queue using try semantics (args: the queue, message, priority and timeout)
 			messageQueuePut = osMessageQueuePut(queue1, &message, 0, 0);
 			
+			// for osMessageQueuePut() returns osErrorResource if there is not enough space 
 			if(messageQueuePut == osErrorResource) {
 				q1Overflow += 1;
 			} else {
 				q1Put += 1;
 			}
-			
 			currentQueue = 2;
 		}
 		else {
@@ -46,6 +49,8 @@ void client(void *arg){
 			
 			currentQueue = 1;
 		}
+		//passing control
+		osThreadYield(); 
 	}
 } 
 
@@ -56,20 +61,26 @@ void server(void *arg){
 	int currentQueue = (int)arg; 
 	int message = 23; // message to put in queue 
 	
+	//infinite polling 
 	while(true){
+		// waits for queue service based on average queue service rate (10hz) & random period of time 
 		osDelay((next_event()*osKernelGetTickFreq()/10) >> 16); 
 		
 		if(currentQueue == 1){
+			
+			// receive a message from a queue with blocking use osMessageQueueGet() (args: queue, message, buffer to record the priority of message, timeout)
+			// logical statement: if received successfully (osOK) , received ++ 
 			if((osMessageQueueGet(queue1, &message, NULL, osWaitForever) == osOK)){
 				q1Received++; 
 			}
 		}
 		
 		else{
-			if ((osMessageQueueGet(queue1, &message, NULL, osWaitForever) == osOK)){
+			if ((osMessageQueueGet(queue2, &message, NULL, osWaitForever) == osOK)){
 				q2Received++; 
 			}
-		}
+		}		
+		// pass control of thread
 		osThreadYield(); 
 	}
 }
