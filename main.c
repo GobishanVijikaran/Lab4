@@ -23,6 +23,7 @@ void client(void *arg){
 	// infinite polling
 	while(true){
 		// waits random period of time (next_event() from random.c). 9hz is the average arrival rate at each (so 18 for 2 queues)
+		// to use next_event () need to convert seconds to ticks and divide by the average rate and then right shift by 16
 		osDelay((next_event()* osKernelGetTickFreq() / (9*2)) >> 16);
 		int message = 57;
 		
