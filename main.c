@@ -1,8 +1,17 @@
 #include <cmsis_os2.h> 
 #include <stdio.h> 
 #include <lpc17xx.h> 
-#include "random.h" 
-#include "lfsr113.h" 
+#include "random.h"  
+
+// Initializing Message Queues
+osMessageQueueId_t queue1;
+osMessageQueueId_t queue2;
+
+// Initializing variables that will hold stats for queue 1
+int q1Overflow, q1Put, q1Received = 0;
+
+// Initializing variables that will hold stats for queue 2
+int q2Overflow, q2Put, q2Received = 0;
 
 void client(void *arg){
 }
