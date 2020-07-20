@@ -93,7 +93,7 @@ void monitor(void *arg){
 						q1Overflow,
 						q2Overflow);
 		
-		printf("Elapsed Time : %ds", time);
+		printf("Elapsed Time : %ds \n", time);
 //		osDelay(osKernelGetTickFreq());
 		time += 1;
 		}
