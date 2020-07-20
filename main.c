@@ -14,6 +14,9 @@ int q1Overflow, q1Put, q1Received = 0;
 // Initializing variables that will hold stats for queue 2
 int q2Overflow, q2Put, q2Received = 0;
 
+// Initializing variables for print statements
+int seconds = 0, previous_seconds = 0;
+
 void client(void *arg){
 	// wait a certain period of time and then send a message to one of the two queues, alternating 
 	// between them. Repeats indefinitely
@@ -30,28 +33,31 @@ void client(void *arg){
 		if(currentQueue == 1){
 			// sending int message to the queue using try semantics (args: the queue, message, priority and timeout)
 			messageQueuePut = osMessageQueuePut(queue1, &message, 0, 0);
-			
-			// for osMessageQueuePut() returns osErrorResource if there is not enough space 
-			if(messageQueuePut == osErrorResource) {
-				q1Overflow += 1;
-			} else {
-				q1Put += 1;
-			}
 			currentQueue = 2;
 		}
-		else {
+		else if (currentQueue == 2){
 			messageQueuePut = osMessageQueuePut(queue2, &message, 0, 0);
-			
-			if(messageQueuePut == osErrorResource) {
-				q2Overflow += 1;
-			} else {
-				q2Put += 1;
-			}
-			
 			currentQueue = 1;
 		}
-		//passing control
-		osThreadYield(); 
+			
+			// for osMessageQueuePut() returns osErrorResource if there is not enough space 
+		if(messageQueuePut == osErrorResource) {
+				if(currentQueue == 1){
+					q1Overflow ++;
+				} else {
+				  q2Overflow ++;
+			}
+		}
+		
+		else if (messageQueuePut == osOK) { 
+			if (currentQueue == 1) {
+				q1Put++;
+			}
+			else {
+				q2Put++;
+			}
+			osThreadYield();//pass control to next thread	
+		}
 	}
 } 
 
@@ -86,30 +92,36 @@ void server(void *arg){
 	}
 }
 
-void monitor(void *arg){
-	// runs once a second and should print the elasped time in seconds as well as other info 
-	int time = 0;
-	
-	while(true) {
-		
-	// total messages sent successfully 
-		printf("The following number of messages were sent successfully... \n Queue 1 --> %d \n Queue 2 --> %d \n",
-						q1Put,
-						q2Put);
-	// total messages received 
-		printf("The following number of messages were received successfully... \n Queue 1 --> %d \n Queue 2 --> %d \n",
-						q1Received,
-						q2Received);
-	// total overflows (when osMessageQueuePut returns osErrorResource
-		printf("The following number of messages were overflow... \n Queue 1 --> %d \n Queue 2 --> %d \n",
-						q1Overflow,
-						q2Overflow);
-		
-		printf("Elapsed Time : %ds \n", time);
-//		osDelay(osKernelGetTickFreq());
-		time += 1;
+void monitor_update_time(void *arg)  //change variable names
+{
+	while(true)
+	{
+		seconds++;
+		osDelay(osKernelGetTickFreq()); //delay by 1 second (simulated)
+	}
+}
+
+void monitor (void *arg) {
+	double tick_freq = osKernelGetTickFreq();
+	while(true){
+		if(seconds>previous_seconds) //will run every 1 simulated second
+		{
+			previous_seconds=seconds;
+			printf("# of Messages Sent for Queue 1: %d\n", q1Put);
+			printf("# of Messages Sent for Queue 2: %d\n", q2Put);
+			printf("\n");
+			printf("# of messages received successfully for Queue 1: %d\n", q1Received); 
+			printf("# of messages received successfully for Queue 2: %d\n", q2Received); 
+			printf("\n");
+			printf("# of Overflows for Queue 1: %d\n", q1Overflow);
+			printf("# of Overflows for Queue 2: %d\n", q2Overflow);
+			printf("\n");
+			
+			printf("Timed elapsed: %d \n", osKernelGetTickCount()/20);
+			osDelay(osKernelGetTickFreq());
 		}
 	}
+}
 
 int main(){
 	// init the Kernel
@@ -120,10 +132,11 @@ int main(){
 	queue2 = osMessageQueueNew(10, sizeof(int), NULL);
 	
 	// init threads
-	osThreadNew(client, NULL, NULL); 
+	osThreadNew(client, NULL, NULL);
 	osThreadNew(server, (void*)1, NULL); 
-	osThreadNew(server, (void*)2, NULL); 
-	osThreadNew(monitor, NULL, NULL); 
+	osThreadNew(server, (void*)2, NULL);
+	osThreadNew(monitor, NULL, NULL);
+	osThreadNew(monitor_update_time,NULL,NULL);
 	
 	// start the Kernel
 	osKernelStart(); 
