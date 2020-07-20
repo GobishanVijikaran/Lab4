@@ -33,17 +33,21 @@ compiling Retarget.c...
 compiling main.c...
 main.c(51): error:  #65: expected a ";"
   void server(void *arg){
-main.c(78): warning:  #1-D: last line of file ends without a newline
+main.c(78): warning:  #12-D: parsing restarts here after previous syntax error
+  	osKernelInitialize(); 
+main.c(83): warning:  #111-D: statement is unreachable
+  	osThreadNew(client, NULL, NULL); 
+main.c(86): error:  #20: identifier "monitor" is undefined
+  	osThreadNew(monitor, NULL, NULL); 
+main.c(90): warning:  #1-D: last line of file ends without a newline
   }
-main.c(78): warning: At end of source:  #12-D: parsing restarts here after previous syntax error
-main.c(78): error: At end of source:  #67: expected a "}"
-main.c: 2 warnings, 2 errors
-compiling uart.c...
+main.c: 3 warnings, 2 errors
 compiling rtx_lib.c...
-compiling RTX_Config.c...
+compiling uart.c...
 assembling startup_LPC17xx.s...
+compiling RTX_Config.c...
 compiling system_LPC17xx.c...
-".\Objects\Lab4.axf" - 2 Error(s), 2 Warning(s).
+".\Objects\Lab4.axf" - 2 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -99,7 +103,7 @@ Package Vendor: Keil
       Include file:  Device\Include\LPC17xx.h
       Source file:   Device\Source\system_LPC17xx.c
 Target not created.
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

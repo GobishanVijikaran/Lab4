@@ -55,10 +55,22 @@ void server(void *arg){
 
 void monitor(void *arg){
 	// runs once a second and should print the elasped time in seconds as well as other info 
+	int time = 0;
 	
+	while(true) {
+		
 	// total messages sent successfully 
+		printf("The following number of messages were sent successfully... \n Queue 1 --> %d \n Queue 2 --> %d \n",
+						q1Put,
+						q2Put);
 	// total messages received 
+		printf("The following number of messages were received successfully... \n Queue 1 --> %d \n Queue 2 --> %d \n",
+						q1Received,
+						q2Received);
 	// total overflows (when osMessageQueuePut returns osErrorResource
+		printf("The following number of messages were overflow... \n Queue 1 --> %d \n Queue 2 --> %d \n",
+						q1Overflow,
+						q2Overflow);
 }
 
 int main(){
