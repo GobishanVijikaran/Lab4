@@ -92,12 +92,12 @@ void monitor(void *arg){
 		printf("The following number of messages were overflow... \n Queue 1 --> %d \n Queue 2 --> %d \n",
 						q1Overflow,
 						q2Overflow);
-		}
-		osDelay(osKernelGetTickFreq());
+		
 		printf("Elapsed Time : %ds", time);
+//		osDelay(osKernelGetTickFreq());
 		time += 1;
+		}
 	}
-}
 
 int main(){
 	// init the Kernel
