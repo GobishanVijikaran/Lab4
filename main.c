@@ -100,11 +100,13 @@ int main(){
 	osKernelInitialize(); 
 	
 	// init queues 
+	queue1 = osMessageQueueNew(10, sizeof(int), NULL);
+	queue2 = osMessageQueueNew(10, sizeof(int), NULL);
 	
 	// init threads
 	osThreadNew(client, NULL, NULL); 
-	osThreadNew(server, NULL, NULL); 
-	osThreadNew(server, NULL, NULL); 
+	osThreadNew(server, (void*)1, NULL); 
+	osThreadNew(server, (void*)2, NULL); 
 	osThreadNew(monitor, NULL, NULL); 
 	
 	// start the Kernel
