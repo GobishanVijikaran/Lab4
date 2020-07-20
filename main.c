@@ -2,6 +2,7 @@
 #include <stdio.h> 
 #include <lpc17xx.h> 
 #include "random.h"  
+#include <stdbool.h>
 
 // Initializing Message Queues
 osMessageQueueId_t queue1;
@@ -14,8 +15,37 @@ int q1Overflow, q1Put, q1Received = 0;
 int q2Overflow, q2Put, q2Received = 0;
 
 void client(void *arg){
-	// wait a random period of time and then send a message to one of the two queues, alternating 
+	// wait a certain period of time and then send a message to one of the two queues, alternating 
 	// between them. Repeats indefinitely
+	int currentQueue = 1;
+	int messageQueuePut;
+	
+	while(true){
+		osDelay((next_event()* osKernelGetTickFreq() / (9*2)) >> 16);
+		int message = 57;
+		
+		if(currentQueue == 1){
+			messageQueuePut = osMessageQueuePut(queue1, &message, 0, 0);
+			
+			if(messageQueuePut == osErrorResource) {
+				q1Overflow += 1;
+			} else {
+				q1Put += 1;
+			}
+			
+			currentQueue = 2;
+		}
+		else {
+			messageQueuePut = osMessageQueuePut(queue2, &message, 0, 0);
+			
+			if(messageQueuePut == osErrorResource) {
+				q2Overflow += 1;
+			} else {
+				q2Put += 1;
+			}
+			
+			currentQueue = 1;
+		}
 }
 
 void server(void *arg){
